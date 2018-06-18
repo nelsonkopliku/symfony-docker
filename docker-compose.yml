@@ -2,35 +2,29 @@ version: '3.2'
 
 services:
   php:
-    image: ${CONTAINER_REGISTRY_BASE}/php
     build:
       context: .
-      cache_from:
-        - ${CONTAINER_REGISTRY_BASE}/php
     environment:
       - XDEBUG_CONFIG=remote_host=10.1.70.170
       - PHP_IDE_CONFIG=serverName=localhost
     depends_on:
       - db
     env_file:
-      - ./.env
+      - ./.docker.env
     # Comment out these volumes in production
     volumes:
-      - ./app:/srv/app:rw,cached
+      - ./:/srv/app:rw,cached
       # If you develop on Linux, uncomment the following line to use a bind-mounted host directory instead
-#      - ./app/var:/srv/app/var:rw
+      - ./var:/srv/app/var:rw
 
   api:
-    image: ${CONTAINER_REGISTRY_BASE}/nginx
     build:
       context: .
       dockerfile: Dockerfile.nginx
-      cache_from:
-        - ${CONTAINER_REGISTRY_BASE}/nginx
     depends_on:
       - php
-#    volumes:
-#      - ./public:/srv/app/public:ro
+    volumes:
+      - ./public:/srv/app/public:ro
     ports:
       - "8080:80"
 

@@ -37,8 +37,8 @@ RUN set -xe \
 	&& apk add --no-cache --virtual .api-phpexts-rundeps $runDeps \
 	&& apk del .build-deps
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY docker/php/php.ini /usr/local/etc/php/php.ini
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
 ENV COMPOSER_ALLOW_SUPERUSER=1
@@ -50,13 +50,19 @@ WORKDIR /srv/app
 
 # Build for production
 ARG APP_ENV=prod
+# Allow to use development versions of Symfony
+ARG STABILITY=stable
+ENV STABILITY ${STABILITY}
+
+# Allow to select skeleton version
+ARG VERSION=""
 
 # Prevent the reinstallation of vendors at every changes in the source code
 #COPY composer.json composer.lock ./
 #RUN composer install --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress --no-suggest \
 #	&& composer clear-cache
 
-COPY . ./
+COPY . .
 
 #RUN mkdir -p var/cache var/log var/sessions \
 ##	&& composer dump-autoload --classmap-authoritative --no-dev \
